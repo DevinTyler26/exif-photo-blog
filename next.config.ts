@@ -18,7 +18,7 @@ const HOSTNAME_AWS_S3 =
   process.env.NEXT_PUBLIC_AWS_S3_BUCKET &&
   process.env.NEXT_PUBLIC_AWS_S3_REGION
     // eslint-disable-next-line max-len
-    ? `${process.env.NEXT_PUBLIC_AWS_S3_BUCKET}.s3.${process.env.NEXT_PUBLIC_AWS_S3_REGION}.amazonaws.com`
+    ? `https://s3.devincunningham.com`
     : undefined;
 
 const generateRemotePattern = (hostname: string) =>
@@ -26,7 +26,7 @@ const generateRemotePattern = (hostname: string) =>
     protocol: 'https',
     hostname: removeUrlProtocol(hostname)!,
     port: '',
-    pathname: '/**',
+    pathname: '/exif-photo-blog/**',
   } as const);
 
 const remotePatterns: RemotePattern[] = [];
@@ -63,6 +63,7 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  output: 'standalone',
 };
 
 module.exports = process.env.ANALYZE === 'true'

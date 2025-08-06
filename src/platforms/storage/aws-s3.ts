@@ -14,15 +14,17 @@ const AWS_S3_ACCESS_KEY = process.env.AWS_S3_ACCESS_KEY ?? '';
 const AWS_S3_SECRET_ACCESS_KEY = process.env.AWS_S3_SECRET_ACCESS_KEY ?? '';
 
 export const AWS_S3_BASE_URL = AWS_S3_BUCKET && AWS_S3_REGION
-  ? `https://${AWS_S3_BUCKET}.s3.${AWS_S3_REGION}.amazonaws.com`
+  ? 'https://s3.devincunningham.com/exif-photo-blog'
   : undefined;
 
 export const awsS3Client = () => new S3Client({
   region: AWS_S3_REGION,
+  forcePathStyle: true,
   credentials: {
     accessKeyId: AWS_S3_ACCESS_KEY,
     secretAccessKey: AWS_S3_SECRET_ACCESS_KEY,
   },
+  endpoint: 'https://s3.devincunningham.com'
 });
 
 const urlForKey = (key?: string) => `${AWS_S3_BASE_URL}/${key}`;

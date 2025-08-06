@@ -1,0 +1,58 @@
+services:
+  exif-photo-blog:
+    image: devintyler2626/exif-photo-blog:latest
+    env_file:
+      - .env
+    # build: 
+      # context: /path/to/exif-photo-blog # Uncomment if you want to initiate builds from the compose
+      # dockerfile: /path/to/exif-photo-blog/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - epb-postgres
+
+  epb-postgres:
+    image: 'postgres:latest'
+    env_file:
+      - .env
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  epb-img-transform-api:
+    image: ghcr.io/coollabsio/next-image-transformation
+    ports:
+      - "3000"
+    env_file:
+      - .env
+    healthcheck:
+      test: "wget -qO- http://localhost:3000/health || exit 1"
+      interval: 2s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      epb-imgproxy:
+        condition: service_healthy
+  epb-imgproxy:
+    image: darthsim/imgproxy
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD", "imgproxy", "health" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file:
+      - .env
+    volumes:
+      - /docker/shared/minio/data:/data
+    command: server /data --console-address ":9001"
+
+volumes:
+  postgres-data:
