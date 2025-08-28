@@ -3,7 +3,7 @@ import ImageWithFallback from './ImageWithFallback';
 
 export default function ImageMedium(props: CustomImageProps) {
   const {
-    aspectRatio,
+    aspectRatio = 1,
     blurCompatibilityMode,
     ...rest
   } = props;
