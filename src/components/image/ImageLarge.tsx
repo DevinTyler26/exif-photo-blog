@@ -4,18 +4,16 @@ import ImageWithFallback from './ImageWithFallback';
 
 export default function ImageLarge(props: CustomImageProps) {
   const {
-    aspectRatio = 1,
+    aspectRatio,
     blurCompatibilityMode,
     ...rest
   } = props;
-  const safeAspectRatio = aspectRatio > 0 ? aspectRatio : 1;
-
   return (
     <ImageWithFallback {...{
       ...rest,
       blurCompatibilityLevel: blurCompatibilityMode ? 'high' : 'none',
       width: IMAGE_WIDTH_LARGE,
-      height: Math.round(IMAGE_WIDTH_LARGE / safeAspectRatio),
+      height: Math.round(IMAGE_WIDTH_LARGE / aspectRatio),
       quality: IMAGE_QUALITY,
     }} />
   );
