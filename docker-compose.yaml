@@ -1,0 +1,78 @@
+services:
+  epb-img-transform-api:
+    image: ghcr.io/coollabsio/next-image-transformation:latest
+    environment:
+      NODE_ENV: production
+      ALLOWED_REMOTE_DOMAINS: "*"
+      IMGPROXY_URL: http://epb-imgproxy:8080
+    depends_on:
+      epb-imgproxy:
+        condition: service_healthy
+    ports:
+      - "8999:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  epb-imgproxy:
+    image: darthsim/imgproxy:latest
+    environment:
+      IMGPROXY_AUTO_WEBP: "false"
+      IMGPROXY_JPEG_PROGRESSIVE: "true"
+      IMGPROXY_USE_ETAG: "true"
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "imgproxy", "health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # minio:
+  #   image: minio/minio:latest
+  #   env_file: [.env]
+  #   command: server /data
+  #   volumes:
+  #     - {edit me - this is your minio storage}:/data
+  #   ports:
+  #     - "9000:9000"   # S3 API
+  #   healthcheck:
+  #     test: ["CMD", "mc", "ready", "local"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 10
+  #   restart: unless-stopped
+
+  epb-postgres:
+    image: postgres:16-alpine
+    env_file: [.env]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+  exif-photo-blog:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: [.env]
+    ports:
+      - "3000:3000"     # publish the app
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

@@ -73,6 +73,8 @@ const nextConfig: NextConfig = {
     qualities: [IMAGE_QUALITY],
     remotePatterns,
     minimumCacheTTL: 31536000,
+    loader: 'custom',
+    loaderFile: './loader.js',
   },
   turbopack: {
     resolveAlias: {
