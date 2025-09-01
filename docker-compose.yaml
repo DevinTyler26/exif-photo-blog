@@ -73,6 +73,10 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    depends_on:
+      - epb-postgres
+      - epb-imgproxy
+      - epb-img-transform-api
 
 volumes:
   postgres-data:
