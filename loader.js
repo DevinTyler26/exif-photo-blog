@@ -6,7 +6,7 @@ export default function myImageLoader({ src, width, quality }) {
 
     const imageOptimizationApi = 'http://img.devincuningham.com';
     // Your NextJS application URL
-    const baseUrl = 'photo.devincunningham.com';
+    const baseUrl = 'photo-test.devincunningham.com';
 
     const fullSrc = `${baseUrl}${src}`;
 
