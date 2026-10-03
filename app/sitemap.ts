@@ -22,8 +22,8 @@ import {
   NULL_CATEGORY_DATA,
 } from '@/category/data';
 
-// Cache for 24 hours
-export const revalidate = 86_400;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const PRIORITY_HOME             = 1;
 const PRIORITY_HOME_VIEW        = 0.9;

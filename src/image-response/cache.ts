@@ -1,5 +1,7 @@
+import { IS_PRODUCTION } from '@/app/config';
+
 export const getImageResponseCacheControlHeaders = (
-  shouldCache = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production',
+  shouldCache = IS_PRODUCTION,
 ) => {
   return {
     'Cache-Control': shouldCache

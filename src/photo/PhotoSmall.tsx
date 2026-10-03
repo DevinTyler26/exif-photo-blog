@@ -11,6 +11,7 @@ import { pathForPhoto } from '@/app/path';
 import { SHOULD_PREFETCH_ALL_LINKS } from '@/app/config';
 import { useRef } from 'react';
 import useVisibility from '@/utility/useVisibility';
+import { getStoredOptimizedPhotoUrl } from './storage/optimized-url';
 
 export default function PhotoSmall({
   photo,
@@ -47,7 +48,9 @@ export default function PhotoSmall({
       prefetch={prefetch}
     >
       <ImageSmall
-        src={photo.url}
+        src={getStoredOptimizedPhotoUrl(photo.url, 'small')}
+        fallbackSrc={photo.url}
+        unoptimized
         aspectRatio={photo.aspectRatio}
         blurDataURL={photo.blurData}
         blurCompatibilityMode={doesPhotoNeedBlurCompatibility(photo)}

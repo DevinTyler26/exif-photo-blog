@@ -1,0 +1,90 @@
+version: "2.4"
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?Set a pinned PostgreSQL image matching the source major version}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      APP_DB_USER: ${APP_DB_USER:?Set APP_DB_USER}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Set APP_DB_PASSWORD}
+    volumes:
+      - ${APP_DATA_ROOT:-./data}/postgres:/var/lib/postgresql/data
+      - ./ops/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - app
+
+  redis:
+    image: ${REDIS_IMAGE:?Set a pinned Redis image version}
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+    command:
+      - redis-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --protected-mode
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$${REDIS_PASSWORD}\" redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks:
+      - app
+
+  web:
+    image: exif-photo-blog:${WEB_IMAGE_TAG:-local}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      POSTGRES_URL: postgresql://${APP_DB_USER:?Set APP_DB_USER}:${APP_DB_PASSWORD:?Set APP_DB_PASSWORD}@postgres:5432/${POSTGRES_DB:?Set POSTGRES_DB}
+      DISABLE_POSTGRES_SSL: ${DISABLE_POSTGRES_SSL:-1}
+      REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD}@redis:6379/0
+      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET}
+      AUTH_URL: ${AUTH_URL:-https://photo.devincunningham.com}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:?Set only after verifying trusted proxy headers}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Set ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD}
+      EXIF_LOCAL_ONLY: ${EXIF_LOCAL_ONLY:-1}
+      DISABLE_AUTO_GENERATE_LOCATIONS: ${DISABLE_AUTO_GENERATE_LOCATIONS:-1}
+      DISABLE_DEBUG_OUTPUTS: ${DISABLE_DEBUG_OUTPUTS:-1}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY}
+      MINIO_SECRET_ACCESS_KEY: ${MINIO_SECRET_ACCESS_KEY:?Set MINIO_SECRET_ACCESS_KEY}
+      NEXT_IMAGE_CACHE_MAX_BYTES: ${NEXT_IMAGE_CACHE_MAX_BYTES:-2147483648}
+    user: "${APP_UID:-1001}:${APP_GID:-1001}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${WEB_BIND_ADDRESS:-192.168.4.177}:${WEB_HOST_PORT:-3100}:3000"
+    volumes:
+      - ${APP_DATA_ROOT:-./data}/next-cache:/app/.next/cache
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge

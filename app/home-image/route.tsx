@@ -10,7 +10,7 @@ import { APP_OG_IMAGE_QUERY_OPTIONS } from '@/feed';
 import { ImageResponse } from 'next/og';
 import { TAG_FAVS } from '@/tag';
 
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const [

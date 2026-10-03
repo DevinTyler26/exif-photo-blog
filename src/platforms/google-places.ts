@@ -1,4 +1,7 @@
-import { GOOGLE_PLACES_GEOCODING_API_KEY } from '@/app/config';
+import {
+  GOOGLE_PLACES_GEOCODING_API_KEY,
+  HAS_LOCATION_SERVICES,
+} from '@/app/config';
 import { Place, PlaceAutocomplete } from '@/place';
 import {
   checkRateLimitAndThrow as _checkRateLimitAndThrow,
@@ -32,6 +35,12 @@ const GEOCODE_PREFERRED_TYPES: GeocodeType[] = [
 const checkRateLimitAndThrow = () =>
   _checkRateLimitAndThrow({ identifier: 'google-places-query' });
 
+const requireGooglePlaces = () => {
+  if (!HAS_LOCATION_SERVICES) {
+    throw new Error('Google Places is disabled for this deployment');
+  }
+};
+
 const headers = {
   'Content-Type': 'application/json',
   'X-Goog-Api-Key': GOOGLE_PLACES_GEOCODING_API_KEY ?? '',
@@ -54,6 +63,7 @@ const parsePlace = (json: any): Place | undefined =>
 export const getPlaceAutocomplete = async (
   input: string,
 ): Promise<PlaceAutocomplete[]> => {
+  requireGooglePlaces();
   await checkRateLimitAndThrow();
   return fetch(
     `${URL_PLACES}:autocomplete`, {
@@ -88,6 +98,7 @@ const fetchPlaceDetails = (id: string) =>
     .then(parsePlace);
 
 export const getPlaceDetails = async (id: string): Promise<Place> => {
+  requireGooglePlaces();
   await checkRateLimitAndThrow();
   return fetchPlaceDetails(id) as Promise<Place>;
 };
@@ -160,6 +171,7 @@ export const getPlaceFromCoordinates = async (
     return;
   }
 
+  requireGooglePlaces();
   await checkRateLimitAndThrow();
 
   const placeId = await getPlaceIdFromCoordinates(latitude, longitude);
@@ -172,6 +184,7 @@ export const getPlaceFromCoordinates = async (
 };
 
 export const testGooglePlacesConnection = async () => {
+  requireGooglePlaces();
   await checkRateLimitAndThrow();
 
   return getPlaceAutocomplete('Test');

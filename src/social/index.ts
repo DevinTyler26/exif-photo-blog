@@ -51,10 +51,8 @@ export const urlForSocial = (
       return url.toString();
     }
     case 'qrcode': {
-      const url = new URL('https://api.qrserver.com/v1/create-qr-code/');
-      url.searchParams.set('data', path);
-      url.searchParams.set('size', '200x200');
-      return url.toString();
+      // QR codes are rendered locally by ShareModal, not linked to a service.
+      return path;
     }
   }
 };

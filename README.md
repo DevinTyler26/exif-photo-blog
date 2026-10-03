@@ -31,6 +31,7 @@ _Submit your site as an example by [opening an issue](https://github.com/sambeck
 📋&nbsp;&nbsp;Contents
 -
 - [Installation](#installation)
+- [Self-hosting with Docker Compose](#self-hosting-with-docker-compose)
 - [Receiving updates](#receiving-updates)
 - [Local development](#local-development)
 - [Customization](#customization)
@@ -41,6 +42,10 @@ _Submit your site as an example by [opening an issue](https://github.com/sambeck
 
 🛠️&nbsp;&nbsp;Installation
 -
+### Self-hosting with Docker Compose
+
+This fork includes a Synology-oriented Compose deployment skeleton. See the [nasy deployment and migration runbook](docs/nasy-deployment.md) for data safety gates, environment setup, the restore drill, reverse proxy, and cutover steps.
+
 ### 1. Deploy to Vercel
 
 1. Click [Deploy](https://vercel.com/new/clone?demo-title=Photo+Blog&demo-description=Store+photos+with+original+camera+data&demo-url=https%3A%2F%2Fphotos.sambecker.com&demo-image=https%3A%2F%2Fphotos.sambecker.com%2Ftemplate-image-tight&project-name=Photo+Blog&repository-name=exif-photo-blog&repository-url=https%3A%2F%2Fgithub.com%2Fsambecker%2Fexif-photo-blog&from=templates&skippable-integrations=1&teamCreateStatus=hidden&stores=%5B%7B%22type%22%3A%22postgres%22%7D%2C%7B%22type%22%3A%22blob%22%7D%5D)
@@ -52,7 +57,7 @@ _Submit your site as an example by [opening an issue](https://github.com/sambeck
 
 ### 2. Setup Auth
 
-1. [Generate auth secret](https://generate-secret.vercel.app/32) and add to environment variables:
+1. Generate an auth secret locally with `openssl rand -base64 32` and add it to environment variables:
    - `AUTH_SECRET`
 2. Add admin user to environment variables:
    - `ADMIN_EMAIL`
@@ -231,18 +236,12 @@ Create Upstash Redis store from storage tab of Vercel dashboard and link to your
 - `NEXT_PUBLIC_SITE_FEEDS = 1` enables feeds at `/feed.json` and `/rss.xml`
 
 ### Scripts & Analytics
-- Web Analytics
-1. Open project on Vercel
-2. Click "Analytics" tab
-3. Follow "Enable Web Analytics" instructions (`@vercel/analytics` already included)
-- Speed Insights
-1. Open project on Vercel
-2. Click "Speed Insights" tab
-3. Follow "Enable Speed Insights" instructions (`@vercel/speed-insights` already included)
+- The Docker Compose deployment omits Vercel Analytics and Speed Insights.
 - `PAGE_SCRIPT_URLS`
   - comma-separated list of URLs to be added to the bottom of the body tag via "next/script"
   - urls must begin with 'https'
-  - ⚠️ this will invoke arbitrary script execution on every page—use with caution
+  - this will invoke arbitrary script execution on every page—use with caution
+  - ignored when `EXIF_LOCAL_ONLY=1` is set for the Docker Compose deployment
 
 ### Debugging
 - `DISABLE_DEBUG_OUTPUTS = 1`

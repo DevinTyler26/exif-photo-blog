@@ -164,15 +164,31 @@ export const getDataUrlsForPhotos = async (
   Promise.all(photos
     .map(async({ id, url }) => {
       // Check for optimized image first
-      const optimizedUrl = await getSignedUrlForUrl(
-        getOptimizedPhotoUrlForSuffix(url, optimizedSuffix),
-        'GET',
-      );
-      const optimizedUrlData = await fetchBase64ImageFromUrl(optimizedUrl);
+      const optimizedUrl = getOptimizedPhotoUrlForSuffix(url, optimizedSuffix);
+      const getImageData = async (imageUrl: string) => {
+        const publicImage = await fetchBase64ImageFromUrl(imageUrl);
+        if (publicImage) { return publicImage; }
+
+        const signedUrl = await Promise.resolve(
+          getSignedUrlForUrl(imageUrl, 'GET'),
+        ).catch(() => undefined);
+        return signedUrl
+          ? fetchBase64ImageFromUrl(signedUrl)
+          : undefined;
+      };
+      const optimizedUrlData = await getImageData(optimizedUrl);
 
       if (optimizedUrlData) {
         return { id, urlData: optimizedUrlData };
       } else {
+        // Public photos can be fetched directly at build time. Try the original
+        // before generating a same-site next/image URL, which may not exist yet
+        // during a standalone image build.
+        const originalUrlData = await getImageData(url);
+        if (originalUrlData) {
+          return { id, urlData: originalUrlData };
+        }
+
         // Fall back on `next/image` if optimized image is not available
         const nextImageUrl = getOptimizedPhotoUrl({
           imageUrl: url,

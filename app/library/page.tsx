@@ -15,7 +15,7 @@ import { TAG_FAVS } from '@/tag';
 import { safelyParseFormattedHtml } from '@/utility/html';
 import { max } from 'date-fns';
 
-export const dynamic = 'force-static';
+export const revalidate = 300;
 
 export default async function LibraryPage() {  
   const appText = await getAppText();

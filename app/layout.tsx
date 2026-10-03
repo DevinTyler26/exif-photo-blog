@@ -1,5 +1,3 @@
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
 import { clsx } from 'clsx/lite';
 import {
   BASE_URL,
@@ -101,9 +99,6 @@ export default function RootLayout({
       // Suppress hydration errors due to next-themes behavior
       suppressHydrationWarning
     >
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-      </head>
       <body className={clsx(
         // Center on large screens
         '3xl:flex flex-col items-center',
@@ -156,8 +151,6 @@ export default function RootLayout({
                       <CommandK />
                     </SharedHoverProvider>
                   </SwrConfigClient>
-                  <Analytics debug={false} />
-                  <SpeedInsights debug={false} />
                   <PhotoEscapeHandler />
                   <ToasterWithThemes />
                 </ThemeProvider>

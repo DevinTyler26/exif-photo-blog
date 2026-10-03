@@ -40,12 +40,6 @@ const generateRemotePattern = (
 });
 
 const remotePatterns: RemotePattern[] = [
-  {
-    protocol: 'https',
-    hostname: 'api.qrserver.com',
-    port: '',
-    pathname: '/v1/create-qr-code/**',
-  },
 ];
 
 if (HOSTNAME_VERCEL_BLOB) {
@@ -75,11 +69,13 @@ const IMAGE_QUALITY =
     : 75;
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     imageSizes: [100, 200],
     qualities: [75, IMAGE_QUALITY],
     remotePatterns,
-    minimumCacheTTL: 31536000,
+    // The NAS image-cache maintenance task caps disk use and prunes old files.
+    minimumCacheTTL: 604800,
   },
   serverExternalPackages: ['exifr'],
   turbopack: {

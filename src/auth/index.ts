@@ -25,7 +25,9 @@ export const clearAuthEmailCookie = () =>
 export const isCredentialsSignInError = (error?: any) =>
   (error?.message || `${error}`).includes(KEY_CREDENTIALS_SIGN_IN_ERROR);
 
-export const generateAuthSecret = () => fetch(
-  'https://generate-secret.vercel.app/32',
-  { cache: 'no-cache' },
-).then(res => res.text());
+export const generateAuthSecret = async () => {
+  const bytes = new Uint8Array(32);
+  globalThis.crypto.getRandomValues(bytes);
+  return Array.from(bytes, value => value.toString(16).padStart(2, '0'))
+    .join('');
+};

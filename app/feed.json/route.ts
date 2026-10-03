@@ -3,8 +3,8 @@ import { SITE_FEEDS_ENABLED } from '@/app/config';
 import { formatFeedJson } from '@/feed/json';
 import { PROGRAMMATIC_QUERY_OPTIONS } from '@/feed';
 
-// Cache for 24 hours
-export const revalidate = 86_400;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
   if (SITE_FEEDS_ENABLED) {

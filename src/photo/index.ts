@@ -128,6 +128,10 @@ export const parsePhotoFromDb = (photoDbRaw: PhotoDb): Photo => {
   ) as unknown as PhotoDb;
   return {
     ...photoDb,
+    blurData: process.env.NEXT_PUBLIC_DISABLE_BLUR === '1' ||
+      process.env.NEXT_PUBLIC_BLUR_DISABLED === '1'
+      ? undefined
+      : photoDb.blurData,
     tags: photoDb.tags ?? [],
     focalLengthFormatted:
       photoDb.focalLength

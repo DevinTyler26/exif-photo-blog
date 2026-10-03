@@ -22,6 +22,7 @@ import {
 } from '@/utility/string';
 import { requestScrollToTop } from '@/utility/useScrollPositionMemory';
 import { getNextImageUrlForRequest } from '@/platforms/next-image';
+import { getStoredOptimizedPhotoUrl } from '@/photo/storage/optimized-url';
 
 const FOLDER_WIDTH = 143;
 const FOLDER_HEIGHT = 93;
@@ -210,7 +211,8 @@ function FolderPhotoImage({
 }) {
   // Raw <img> avoids next/image client JS + decode() overhead across
   // hundreds of tiny folder tiles; still hit the optimizer at w=200
-  const src = getNextImageUrlForRequest({
+  const src = getStoredOptimizedPhotoUrl(photo.url, size);
+  const fallbackSrc = getNextImageUrlForRequest({
     imageUrl: photo.url,
     size: size === 'large'
       ? 640
@@ -229,6 +231,12 @@ function FolderPhotoImage({
         )}
         loading="lazy"
         decoding="async"
+        onError={event => {
+          if (event.currentTarget.dataset.fallback !== 'true') {
+            event.currentTarget.dataset.fallback = 'true';
+            event.currentTarget.src = fallbackSrc;
+          }
+        }}
       />
     </div>
   );

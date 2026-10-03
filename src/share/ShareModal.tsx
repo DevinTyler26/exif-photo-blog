@@ -15,7 +15,7 @@ import MaskedScroll from '@/components/MaskedScroll';
 import { useAppText } from '@/i18n/state/client';
 import SocialButton from '@/social/SocialButton';
 import LoaderButton from '@/components/primitives/LoaderButton';
-import Image from 'next/image';
+import { QRCodeSVG } from 'qrcode.react';
 
 const BUTTON_COLOR_CLASSNAMES = clsx(
   'border-gray-200 bg-gray-50 active:bg-gray-100',
@@ -102,13 +102,13 @@ export default function ShareModal({
               'p-3 bg-white rounded-2xl shadow-lg outline-medium',
               'flex items-center justify-center',
             )}>
-              <Image
-                /* eslint-disable-next-line max-len */
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(pathShare)}`}
-                alt="QR Code"
+              <QRCodeSVG
+                aria-label="QR Code"
                 className="rounded-xl bg-white"
-                width={300}
-                height={300}
+                includeMargin
+                level="M"
+                size={300}
+                value={pathShare}
               />
             </div>
           </div>

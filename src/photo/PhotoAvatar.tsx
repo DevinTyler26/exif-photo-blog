@@ -2,6 +2,7 @@ import ImageMedium from '@/components/image/ImageMedium';
 import { altTextForPhoto, Photo } from '.';
 import clsx from 'clsx/lite';
 import { ReactNode } from 'react';
+import { getStoredOptimizedPhotoUrl } from './storage/optimized-url';
 
 export default function PhotoAvatar({
   photo,
@@ -21,7 +22,9 @@ export default function PhotoAvatar({
     )}>
       {photo
         ? <ImageMedium
-          src={photo.url}
+          src={getStoredOptimizedPhotoUrl(photo.url, 'small')}
+          fallbackSrc={photo.url}
+          unoptimized
           className="object-cover w-full h-full"
           alt={altTextForPhoto(photo)}
           blurDataURL={photo.blurData}

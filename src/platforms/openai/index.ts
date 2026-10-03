@@ -83,13 +83,11 @@ export const streamOpenAiImageQuery = async (
   imageBase64: string,
   query: string,
 ) => {
-  await checkRateLimitAndThrow();
-
   const stream = createStreamableValue('');
-
   const args = getImageTextArgs(imageBase64, query);
 
   if (args) {
+    await checkRateLimitAndThrow();
     (async () => {
       const { textStream } = streamText(args);
       for await (const delta of textStream) {
@@ -97,6 +95,8 @@ export const streamOpenAiImageQuery = async (
       }
       stream.done();
     })();
+  } else {
+    stream.done();
   }
 
   return stream.value;
@@ -107,11 +107,10 @@ export const generateOpenAiImageQuery = async (
   query: string,
   isBatch?: boolean,
 ) => {
-  await checkRateLimitAndThrow(isBatch);
-
   const args = getImageTextArgs(imageBase64, query);
 
   if (args) {
+    await checkRateLimitAndThrow(isBatch);
     return generateText(args)
       .then(({ text }) => cleanUpAiTextResponse(text));
   }
@@ -195,9 +194,8 @@ export const generateOpenAiImageQueryForModel = async (
 };
 
 export const testOpenAiConnection = async () => {
-  await checkRateLimitAndThrow();
-
   if (model) {
+    await checkRateLimitAndThrow();
     return generateText({
       model,
       messages: [{
