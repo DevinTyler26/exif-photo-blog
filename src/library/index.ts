@@ -1,7 +1,7 @@
 import { META_TITLE, SHOW_TEMPLATE_ATTRIBUTION } from '@/app/config';
 import type { CategoryKey } from '@/category';
 import { AppTextState } from '@/i18n/state';
-import type { Photo } from '@/photo';
+import type { PhotoFolderPreview } from '@/photo';
 
 export interface LibraryInsert {
   id: number
@@ -21,7 +21,7 @@ export interface LibrarySetFolder {
   key: string
   caption: string
   path: string
-  photos: Photo[]
+  photos: PhotoFolderPreview[]
   count: number
 }
 

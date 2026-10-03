@@ -122,6 +122,15 @@ export interface Photo extends Omit<PhotoDb, 'recipeData' | 'colorData'> {
   updateStatus?: PhotoUpdateStatus
 }
 
+export type PhotoFolderPreview = Pick<
+  Photo,
+  'id' | 'url' | 'aspectRatio' | 'colorData'
+> & {
+  altText: string
+};
+
+export type PhotoFolderPhoto = Photo | PhotoFolderPreview;
+
 export const parsePhotoFromDb = (photoDbRaw: PhotoDb): Photo => {
   const photoDb = camelcaseKeys(
     photoDbRaw as unknown as Record<string, unknown>,

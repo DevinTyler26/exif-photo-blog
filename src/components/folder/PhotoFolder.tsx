@@ -2,6 +2,7 @@
 
 import {
   Photo,
+  PhotoFolderPhoto,
   altTextForPhoto,
 } from '@/photo';
 import Badge from '@/components/Badge';
@@ -11,7 +12,7 @@ import Spinner from '@/components/Spinner';
 import { CSSProperties, ReactNode } from 'react';
 import {
   convertOklchToCss,
-  getKeyColorFromPhoto,
+  getKeyColorFromColorData,
   Oklch,
 } from '@/photo/color/client';
 import { PHOTO_FOLDER_MAX_PHOTOS, PHOTO_FOLDER_PEEK_PHOTOS } from '.';
@@ -139,7 +140,7 @@ const hashToUnit = (value: string, salt: number) => {
 };
 
 const getPeekStyle = (
-  photo: Photo,
+  photo: Pick<Photo, 'id'>,
   index: number,
   folderWidth: number,
   slot: PeekSlot,
@@ -204,7 +205,7 @@ function FolderPhotoImage({
   classNameImage,
   size = 'small',
 }: {
-  photo: Photo
+  photo: PhotoFolderPhoto
   className?: string
   classNameImage?: string
   size?: 'small' | 'medium' | 'large'
@@ -224,7 +225,7 @@ function FolderPhotoImage({
     <div className={clsx('flex relative', className)}>
       <img
         src={src}
-        alt={altTextForPhoto(photo)}
+        alt={'altText' in photo ? photo.altText : altTextForPhoto(photo)}
         className={clsx(
           classNameImage,
           'bg-gray-400/20 dark:bg-gray-950/25',
@@ -256,7 +257,7 @@ export default function PhotoFolder({
   href,
   maxPhotos = PHOTO_FOLDER_MAX_PHOTOS,
 }: {
-  photos: Photo[]
+  photos: PhotoFolderPhoto[]
   className?: string
   width?: number
   channel?: boolean
@@ -282,7 +283,7 @@ export default function PhotoFolder({
 
   const isTinted = tint === 'on' || tint === 'debug';
   const tintColor = isTinted
-    ? getKeyColorFromPhoto(photosInFolder[0])
+    ? getKeyColorFromColorData(photosInFolder[0]?.colorData)
     : undefined;
   const tintStyle = tintColor
     ? getFolderTint(tintColor)

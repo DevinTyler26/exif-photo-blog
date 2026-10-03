@@ -20,7 +20,8 @@ import { labelForFilm } from '@/film';
 import { formatFocalLength } from '@/focal';
 import { AppTextState } from '@/i18n/state';
 import { formatLensText } from '@/lens';
-import { Photo } from '@/photo';
+import { altTextForPhoto, Photo } from '@/photo';
+import type { PhotoFolderPreview } from '@/photo';
 import { getPhotoCached, getPhotosCached } from '@/photo/cache';
 import {
   PHOTO_FOLDER_MAX_PHOTOS,
@@ -219,9 +220,16 @@ export const getLibraryFolderRows = async (
           caption: query.caption,
           path: query.path,
           count: query.count,
-          // Omit blurData so /library ISR stays under Vercel's 19MB page limit
           photos: (folderPhotos[photoIndex++] ?? [])
-            .map(({ blurData: _blurData, ...photo }) => photo),
+            .map((photo, index): PhotoFolderPreview => ({
+              id: photo.id,
+              url: photo.url,
+              aspectRatio: photo.aspectRatio,
+              altText: altTextForPhoto(photo),
+              ...(index === 0 && photo.colorData
+                ? { colorData: photo.colorData }
+                : {}),
+            })),
         }))
         .filter(folder => folder.photos.length > 0),
     }))
