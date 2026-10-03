@@ -2,13 +2,15 @@
 
 The intended runtime is Docker Compose on Debian VM 103 (`192.168.4.177`); MinIO and its existing bucket stay on nasy. The supplied snapshot is a Supabase cluster backup, so restore and verify an app-only copy before using it for either image generation or production. Keep the original managed services and backups until the restore drill and cutover checks pass.
 
+See [performance and restore evidence](performance-and-restore-evidence.md) for current origin timings, local candidate measurements, and the completed disposable restore drill.
+
 ## Current target inventory
 
 - Proxmox VM 103 runs Debian 12 and had address `192.168.4.177` in the 2026-09-23 screenshot. The guest was configured with 4 vCPUs and 16 GiB RAM at that time. The Proxmox host is a 4-core i5-7500 with 31 GiB RAM; the screenshot showed 23.5 GiB host RAM in use and 2.18 GiB swap in use. Recheck live capacity before resizing the guest; the host looked memory constrained despite spare VM capacity being possible.
 - The Cloudflare Tunnel route is `photo.devincunningham.com` to `http://192.168.4.177:3100`. Compose binds the web container to that VM address and port. Keep the host firewall limited to the tunnel connector and trusted LAN administration.
 - MinIO remains on nasy. Keep the public object hostname and bucket unchanged so URLs already stored in PostgreSQL continue to work. The MinIO hostname shown in the existing tunnel is `minio.devincunningham.com`.
 - Build the web image on the Mac for `linux/amd64`; do not run Next.js's production build on the VM or on nasy. This avoids competing for the VM's memory and produces the architecture used by Debian.
-- Confirm Docker Engine, Compose support, persistent data paths, and free disk on Debian before importing the application database. The data path and current deployment status are still to be inventoried.
+- The app readiness endpoint responds on port 3100 and the current photo site is reachable there. Confirm the running container, Compose project, persistent data paths, and free disk on Debian before replacing it; those details still need SSH inventory.
 
 ## Services and ports
 
@@ -26,7 +28,7 @@ Next.js standalone output needs `.next/standalone/server.js`, plus `public` and 
 1. Record Debian's CPU architecture, available RAM and disk, Docker/Compose versions, persistent data path, firewall rules, and Cloudflare Tunnel connector status.
 2. Inspect the source database version, public schema tables/extensions/triggers, counts for `photos`, `albums`, `album_photo`, and `library` or legacy `about`, database size, and the hostnames in stored photo URLs. Do not place photo metadata or credentials in the report.
 3. Take an encrypted off-NAS source database backup. Restore it into a disposable PostgreSQL instance and verify counts before using the copy with this app. Confirm a MinIO snapshot/backup and restore one object under a separate test key.
-4. Select a PostgreSQL image tag matching the observed source major version and a pinned Redis version. The blank `POSTGRES_IMAGE` and `REDIS_IMAGE` values in `.env.example` intentionally prevent Compose from starting until these choices are filled in.
+4. The supplied snapshot is from PostgreSQL 15.8. Its public app schema restored successfully into the tested PostgreSQL 16.14 image. `.env.example` pins PostgreSQL 16.14 and Redis 7.4.2; keep those tags for the initial deployment unless the completed extension inventory shows a compatibility issue.
 5. Confirm the existing MinIO object hostname resolves from both a remote browser and the app container with a valid certificate. Check public GET and presigned browser PUT, bucket policy, and CORS for the photo domain.
 
 The upstream app runs query-time schema migrations. Always test the newer code against a restored copy first. Inspect schema ownership, RLS, extensions, triggers, functions, grants, and any references to Supabase-managed roles/schemas before deciding how to restore `public` and assign the app role. Use Supabase's filtered CLI dump, not an unfiltered raw dump: its [restore guide](https://supabase.com/docs/guides/self-hosting/restore-from-platform) excludes managed internals and recommends direct or session-pooler connections.
